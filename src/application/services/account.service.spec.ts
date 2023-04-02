@@ -1,19 +1,30 @@
 import { AccountRepositoryMemory } from "../../infra/repositories/account.repository.memory";
 import { InputAccountDto } from "../dtos/input.account.dto";
 import { AccountService } from "./account.service";
+import { AccountRepository } from "../../domain/repositories/account.repository";
 
-test("create account using service", async () => {
-  const createAccountDto = new InputAccountDto();
-  createAccountDto.document = "111.111.111-11";
-  createAccountDto.name = "Test name 1";
+describe("AccountApplicationService", () => {
+  test("create account using service and find by id and document", async () => {
+    const createAccountDto = new InputAccountDto();
+    createAccountDto.document = "111.111.111-11";
+    createAccountDto.name = "Test name 1";
 
-  const accountRepository = new AccountRepositoryMemory();
-  const accountService = new AccountService(accountRepository);
+    const accountRepository: AccountRepository = new AccountRepositoryMemory();
 
-  await accountService.create(createAccountDto);
-  const accountCreated = await accountService.findByDocument(
-    createAccountDto.document
-  );
+    const accountService = new AccountService(accountRepository);
 
-  expect(accountCreated?.document).toBe(createAccountDto.document);
+    await accountService.create(createAccountDto);
+
+    const accountFoundByDocument = await accountService.findByDocument(
+      createAccountDto.document
+    );
+
+    expect(accountFoundByDocument?.document).toBe(createAccountDto.document);
+
+    const id = accountFoundByDocument?.id || "";
+
+    const accountFoundById = await accountService.findById(id);
+
+    expect(accountFoundById?.document).toBe(createAccountDto.document);
+  });
 });
